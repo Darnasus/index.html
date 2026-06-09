@@ -872,20 +872,53 @@ footer a { color: var(--verde-menta); text-decoration: none; }
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const COOPERATIVAS = [
-  { id:1,  nombre:"Coop. Ltda. de Trabajo El Ceibo", rubro:"produccion", rubroLabel:"Producción", localidad:"Rosario", descripcion:"Fabricación de muebles y aberturas de madera. Trabajamos con maderas de la región y priorizamos la cadena de producción local.", anio:2008, socios:34, matricula:"12.455", lat:-32.9442, lng:-60.6505, telefono:"(0341) 456-7890", email:"elceibo@coop.com.ar", web:"" },
-  { id:2,  nombre:"Coop. de Trabajo Tecnored", rubro:"tecnologia", rubroLabel:"Tecnología", localidad:"Rosario", descripcion:"Desarrollo de software, aplicaciones web y móviles para pymes y organismos del estado provincial.", anio:2015, socios:18, matricula:"18.901", lat:-32.9568, lng:-60.6387, telefono:"(0341) 234-5678", email:"info@tecnored.coop", web:"tecnored.coop" },
-  { id:3,  nombre:"La Yerba Buena Coop. Agroalimentaria", rubro:"agro", rubroLabel:"Agro / Alimentos", localidad:"Venado Tuerto", descripcion:"Producción y comercialización de frutas y hortalizas agroecológicas en red con productores de la región sur.", anio:2011, socios:52, matricula:"15.220", lat:-33.7451, lng:-61.9621, telefono:"(03462) 42-3344", email:"layerbabuena@agro.coop", web:"" },
-  { id:4,  nombre:"Coop. de Trabajo Construir Juntos", rubro:"construccion", rubroLabel:"Construcción", localidad:"Santa Fe Capital", descripcion:"Servicios de construcción, refacción y obra nueva con equipos de albañilería, plomería, electricidad y pintura.", anio:2005, socios:28, matricula:"10.347", lat:-31.6333, lng:-60.7000, telefono:"(0342) 455-6789", email:"construirjuntos@coop.com.ar", web:"" },
-  { id:5,  nombre:"Coop. Textil Hilando Sueños", rubro:"produccion", rubroLabel:"Producción", localidad:"Rafaela", descripcion:"Diseño, confección y comercialización de indumentaria con materiales sostenibles.", anio:2017, socios:22, matricula:"20.115", lat:-31.2515, lng:-61.4868, telefono:"(03492) 43-2211", email:"hilandosuenos@coop.com.ar", web:"hilandosuenos.com.ar" },
-  { id:6,  nombre:"Coop. de Servicios Ambientales Natura", rubro:"servicios", rubroLabel:"Servicios", localidad:"Rosario", descripcion:"Limpieza y mantenimiento de edificios, espacios verdes y plantas industriales bajo estándares ambientales.", anio:2013, socios:45, matricula:"16.780", lat:-32.9000, lng:-60.6800, telefono:"(0341) 678-9012", email:"natura@servicios.coop", web:"" },
-  { id:7,  nombre:"Mutual y Coop. de Salud Sur", rubro:"salud", rubroLabel:"Salud", localidad:"Venado Tuerto", descripcion:"Prestaciones de salud primaria, odontología, psicología y nutrición. Modelo solidario y accesible.", anio:2003, socios:65, matricula:"9.002", lat:-33.7700, lng:-62.0100, telefono:"(03462) 43-5566", email:"saludsur@coop.com.ar", web:"saludsur.coop" },
-  { id:8,  nombre:"Coop. de Transporte El Litoral", rubro:"transporte", rubroLabel:"Transporte", localidad:"Santa Fe Capital", descripcion:"Servicios de transporte de cargas y distribución regional con cobertura en toda la provincia.", anio:2009, socios:30, matricula:"13.441", lat:-31.6500, lng:-60.7200, telefono:"(0342) 480-1234", email:"ellitoral@transporte.coop", web:"" },
-  { id:9,  nombre:"Coop. Educativa Semillas", rubro:"educacion", rubroLabel:"Educación", localidad:"Esperanza", descripcion:"Centro educativo cooperativo con nivel inicial, primario y talleres para adultos. Pedagogía activa y comunitaria.", anio:2001, socios:40, matricula:"7.890", lat:-31.4480, lng:-60.9287, telefono:"(03496) 42-0011", email:"semillas@edu.coop", web:"semillascoop.org" },
-  { id:10, nombre:"Coop. Gráfica Estampa", rubro:"produccion", rubroLabel:"Producción", localidad:"Rosario", descripcion:"Imprenta y diseño gráfico. Libros, revistas, folletería y material promocional. Especializados en ediciones independientes.", anio:2006, socios:16, matricula:"11.233", lat:-32.9700, lng:-60.6600, telefono:"(0341) 555-4433", email:"estampa@grafica.coop", web:"estampacoop.com.ar" },
-  { id:11, nombre:"Coop. de Trabajo Limpieza Total", rubro:"servicios", rubroLabel:"Servicios", localidad:"San Lorenzo", descripcion:"Servicios integrales de limpieza para empresas, comercios, hospitales y edificios públicos.", anio:2018, socios:38, matricula:"21.004", lat:-32.7450, lng:-60.7350, telefono:"(03476) 42-7788", email:"limpiezatotal@coop.com.ar", web:"" },
-  { id:12, nombre:"Coop. Metalúrgica Forja Sur", rubro:"produccion", rubroLabel:"Producción", localidad:"Villa Constitución", descripcion:"Mecanizado, soldadura y fabricación de estructuras metálicas. Recuperada en 2002, referente del cooperativismo santafesino.", anio:2002, socios:55, matricula:"9.988", lat:-33.2280, lng:-60.3350, telefono:"(03400) 42-5566", email:"forjasur@metalurgica.coop", web:"forjasur.coop" }
-];
+let COOPERATIVAS = [];
+
+async function cargarDesdeSheets() {
+  const URL_CSV = 'ACA_PEGA_TU_URL_DEL_PASO_2';
+  try {
+    const res = await fetch(URL_CSV);
+    const csv = await res.text();
+    const filas = csv.trim().split('\n');
+    const encabezados = filas[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+    COOPERATIVAS = filas.slice(1).map((fila, i) => {
+      const cols = parsearFilaCSV(fila);
+      const obj = {};
+      encabezados.forEach((h, j) => obj[h] = (cols[j] || '').trim());
+      return {
+        id:         i + 1,
+        nombre:     obj.nombre     || '',
+        rubro:      obj.rubro      || 'otro',
+        rubroLabel: obj.rubroLabel || 'Otro',
+        localidad:  obj.localidad  || '',
+        descripcion:obj.descripcion|| '',
+        anio:       obj.anio       || '',
+        socios:     obj.socios     || '',
+        matricula:  obj.matricula  || '',
+        lat:        parseFloat(obj.lat) || -32.2,
+        lng:        parseFloat(obj.lng) || -61.2,
+        telefono:   obj.telefono   || '',
+        email:      obj.email      || '',
+        web:        obj.web        || ''
+      };
+    }).filter(c => c.nombre && c.lat && c.lng);
+  } catch (e) {
+    console.error('Error cargando Sheets:', e);
+  }
+}
+
+function parsearFilaCSV(fila) {
+  const cols = [];
+  let actual = '', dentro = false;
+  for (let i = 0; i < fila.length; i++) {
+    const ch = fila[i];
+    if (ch === '"') { dentro = !dentro; }
+    else if (ch === ',' && !dentro) { cols.push(actual); actual = ''; }
+    else { actual += ch; }
+  }
+  cols.push(actual);
+  return cols;
+}
 
 const RUBRO_COLORES = {
   produccion:   { bg:'#e3f0d8', txt:'#2d6e47', marker:'#4a9e6b' },
@@ -1159,7 +1192,25 @@ const localidadesSet = new Set(COOPERATIVAS.map(c => c.localidad));
 document.getElementById('stat-total').textContent = COOPERATIVAS.length;
 document.getElementById('stat-localidades').textContent = localidadesSet.size;
 
-renderLista();
+cargarDesdeSheets().then(() => {
+  const localidadesSet = new Set(COOPERATIVAS.map(c => c.localidad));
+  document.getElementById('stat-total').textContent = COOPERATIVAS.length;
+  document.getElementById('stat-localidades').textContent = localidadesSet.size;
+  COOPERATIVAS.forEach(c => {
+    const m = L.marker([c.lat, c.lng], { icon: crearIcono(c.rubro) }).addTo(mapa);
+    const col = RUBRO_COLORES[c.rubro] || RUBRO_COLORES.otro;
+    m.bindPopup(`
+      <div class="popup-coop">
+        <div style="font-size:0.66rem;font-weight:600;padding:2px 7px;border-radius:20px;background:${col.bg};color:${col.txt};display:inline-block;margin-bottom:5px">${c.rubroLabel}</div>
+        <div class="popup-coop-nombre">${c.nombre}</div>
+        <div class="popup-coop-loc">📍 ${c.localidad}</div>
+        <button class="popup-btn" onclick="abrirModal(${c.id})">Ver información →</button>
+      </div>`, { minWidth:230, maxWidth:250 });
+    m.on('click', () => resaltarCard(c.id));
+    marcadores[c.id] = m;
+  });
+  renderLista();
+});
 </script>
 </body>
 </html>
