@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -782,6 +782,16 @@ footer a { color: var(--verde-menta); text-decoration: none; }
   </div>
 </div>
 
+<!-- MENSAJE CARGANDO -->
+<div id="cargando-msg" style="display:none;position:fixed;inset:0;z-index:5000;background:rgba(26,74,46,0.55);backdrop-filter:blur(3px);align-items:center;justify-content:center;flex-direction:column;gap:12px;">
+  <div style="width:40px;height:40px;border:3px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+  <p style="color:white;font-family:'DM Sans',sans-serif;font-size:0.95rem;font-weight:500;">Cargando cooperativas…</p>
+</div>
+<div id="error-carga" style="display:none;background:#fde8e8;border:1.5px solid #d44a4a;border-radius:12px;padding:1rem 1.25rem;margin:1rem 1.25rem;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:#9e2020;">
+  ⚠️ No se pudo cargar la planilla. Verificá que el Google Sheets esté publicado correctamente como CSV público.
+</div>
+<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+
 <!-- LAYOUT PRINCIPAL -->
 <div class="main-wrap" id="main-wrap">
   <div class="panel-lista" id="panel-lista"></div>
@@ -874,38 +884,7 @@ footer a { color: var(--verde-menta); text-decoration: none; }
 <script>
 let COOPERATIVAS = [];
 
-async function cargarDesdeSheets() {
-  const URL_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQMGEKyeC4Z4FleSYGQuJ7VhUwshxuWeWWKYu3SVKcZcrfHtoCuw3B4Gpfub_0sBIhJDtDdfDdXP-Qd/pubhtml?gid=0&single=true';
-  try {
-    const res = await fetch(URL_CSV);
-    const csv = await res.text();
-    const filas = csv.trim().split('\n');
-    const encabezados = filas[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-    COOPERATIVAS = filas.slice(1).map((fila, i) => {
-      const cols = parsearFilaCSV(fila);
-      const obj = {};
-      encabezados.forEach((h, j) => obj[h] = (cols[j] || '').trim());
-      return {
-        id:         i + 1,
-        nombre:     obj.nombre     || '',
-        rubro:      obj.rubro      || 'otro',
-        rubroLabel: obj.rubroLabel || 'Otro',
-        localidad:  obj.localidad  || '',
-        descripcion:obj.descripcion|| '',
-        anio:       obj.anio       || '',
-        socios:     obj.socios     || '',
-        matricula:  obj.matricula  || '',
-        lat:        parseFloat(obj.lat) || -32.2,
-        lng:        parseFloat(obj.lng) || -61.2,
-        telefono:   obj.telefono   || '',
-        email:      obj.email      || '',
-        web:        obj.web        || ''
-      };
-    }).filter(c => c.nombre && c.lat && c.lng);
-  } catch (e) {
-    console.error('Error cargando Sheets:', e);
-  }
-}
+const URL_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQMGEKyeC4Z4FleSYGQuJ7VhUwshxuWeWWKYu3SVKcZcrfHtoCuw3B4Gpfub_0sBIhJDtDdfDdXP-Qd/pub?output=csv';
 
 function parsearFilaCSV(fila) {
   const cols = [];
@@ -919,6 +898,46 @@ function parsearFilaCSV(fila) {
   cols.push(actual);
   return cols;
 }
+
+async function cargarDesdeSheets() {
+  const msgEl = document.getElementById('cargando-msg');
+  if (msgEl) msgEl.style.display = 'flex';
+  try {
+    const res = await fetch(URL_CSV);
+    if (!res.ok) throw new Error('Error HTTP ' + res.status);
+    const csv = await res.text();
+    const filas = csv.trim().split('\n');
+    const encabezados = parsearFilaCSV(filas[0]).map(h => h.trim().replace(/^"|"$/g, ''));
+    COOPERATIVAS = filas.slice(1).map((fila, i) => {
+      const cols = parsearFilaCSV(fila);
+      const obj = {};
+      encabezados.forEach((h, j) => { obj[h] = (cols[j] || '').trim().replace(/^"|"$/g, ''); });
+      return {
+        id:          i + 1,
+        nombre:      obj.nombre      || '',
+        rubro:       obj.rubro       || 'otro',
+        rubroLabel:  obj.rubroLabel  || 'Otro',
+        localidad:   obj.localidad   || '',
+        descripcion: obj.descripcion || '',
+        anio:        obj.anio        || '',
+        socios:      obj.socios      || '',
+        matricula:   obj.matricula   || '',
+        lat:         parseFloat(obj.lat)  || null,
+        lng:         parseFloat(obj.lng)  || null,
+        telefono:    obj.telefono    || '',
+        email:       obj.email       || '',
+        web:         obj.web         || ''
+      };
+    }).filter(c => c.nombre && c.lat && c.lng);
+  } catch(e) {
+    console.error('No se pudo cargar el Sheets:', e);
+    const errEl = document.getElementById('error-carga');
+    if (errEl) { errEl.style.display = 'block'; }
+  } finally {
+    if (msgEl) msgEl.style.display = 'none';
+  }
+}
+
 
 const RUBRO_COLORES = {
   produccion:   { bg:'#e3f0d8', txt:'#2d6e47', marker:'#4a9e6b' },
@@ -956,19 +975,21 @@ function crearIcono(rubro) {
   return L.divIcon({ html:svg, className:'', iconSize:[34,42], iconAnchor:[17,42], popupAnchor:[0,-44] });
 }
 
-COOPERATIVAS.forEach(c => {
-  const m = L.marker([c.lat, c.lng], { icon: crearIcono(c.rubro) }).addTo(mapa);
-  const col = RUBRO_COLORES[c.rubro] || RUBRO_COLORES.otro;
-  m.bindPopup(`
-    <div class="popup-coop">
-      <div style="font-size:0.66rem;font-weight:600;padding:2px 7px;border-radius:20px;background:${col.bg};color:${col.txt};display:inline-block;margin-bottom:5px">${c.rubroLabel}</div>
-      <div class="popup-coop-nombre">${c.nombre}</div>
-      <div class="popup-coop-loc">📍 ${c.localidad}</div>
-      <button class="popup-btn" onclick="abrirModal(${c.id})">Ver información →</button>
-    </div>`, { minWidth:230, maxWidth:250 });
-  m.on('click', () => resaltarCard(c.id));
-  marcadores[c.id] = m;
-});
+function agregarMarcadores() {
+  COOPERATIVAS.forEach(c => {
+    const m = L.marker([c.lat, c.lng], { icon: crearIcono(c.rubro) }).addTo(mapa);
+    const col = RUBRO_COLORES[c.rubro] || RUBRO_COLORES.otro;
+    m.bindPopup(`
+      <div class="popup-coop">
+        <div style="font-size:0.66rem;font-weight:600;padding:2px 7px;border-radius:20px;background:${col.bg};color:${col.txt};display:inline-block;margin-bottom:5px">${c.rubroLabel}</div>
+        <div class="popup-coop-nombre">${c.nombre}</div>
+        <div class="popup-coop-loc">📍 ${c.localidad}</div>
+        <button class="popup-btn" onclick="abrirModal(${c.id})">Ver información →</button>
+      </div>`, { minWidth:230, maxWidth:250 });
+    m.on('click', () => resaltarCard(c.id));
+    marcadores[c.id] = m;
+  });
+}
 
 /* ── FILTRAR ── */
 function filtrarCoops() {
@@ -1187,28 +1208,12 @@ document.getElementById('filtro-rubro-drawer').addEventListener('change', e => {
   renderDrawer();
 });
 
-/* ── STATS ── */
-const localidadesSet = new Set(COOPERATIVAS.map(c => c.localidad));
-document.getElementById('stat-total').textContent = COOPERATIVAS.length;
-document.getElementById('stat-localidades').textContent = localidadesSet.size;
-
+/* ── INIT: cargar desde Sheets y arrancar ── */
 cargarDesdeSheets().then(() => {
   const localidadesSet = new Set(COOPERATIVAS.map(c => c.localidad));
   document.getElementById('stat-total').textContent = COOPERATIVAS.length;
   document.getElementById('stat-localidades').textContent = localidadesSet.size;
-  COOPERATIVAS.forEach(c => {
-    const m = L.marker([c.lat, c.lng], { icon: crearIcono(c.rubro) }).addTo(mapa);
-    const col = RUBRO_COLORES[c.rubro] || RUBRO_COLORES.otro;
-    m.bindPopup(`
-      <div class="popup-coop">
-        <div style="font-size:0.66rem;font-weight:600;padding:2px 7px;border-radius:20px;background:${col.bg};color:${col.txt};display:inline-block;margin-bottom:5px">${c.rubroLabel}</div>
-        <div class="popup-coop-nombre">${c.nombre}</div>
-        <div class="popup-coop-loc">📍 ${c.localidad}</div>
-        <button class="popup-btn" onclick="abrirModal(${c.id})">Ver información →</button>
-      </div>`, { minWidth:230, maxWidth:250 });
-    m.on('click', () => resaltarCard(c.id));
-    marcadores[c.id] = m;
-  });
+  agregarMarcadores();
   renderLista();
 });
 </script>
