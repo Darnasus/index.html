@@ -875,7 +875,7 @@ footer a { color: var(--verde-menta); text-decoration: none; }
 let COOPERATIVAS = [];
 
 async function cargarDesdeSheets() {
-  const URL_CSV = 'ACA_PEGA_TU_URL_DEL_PASO_2';
+  const URL_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQMGEKyeC4Z4FleSYGQuJ7VhUwshxuWeWWKYu3SVKcZcrfHtoCuw3B4Gpfub_0sBIhJDtDdfDdXP-Qd/pubhtml?gid=0&single=true';
   try {
     const res = await fetch(URL_CSV);
     const csv = await res.text();
