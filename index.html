@@ -716,6 +716,106 @@ footer a { color: var(--verde-menta); text-decoration: none; }
   .drawer-overlay { display: none !important; }
   .drawer { display: none !important; }
 }
+
+/* ─── HEADER DERECHA ─── */
+.header-derecha {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ─── MENÚ HAMBURGUESA ─── */
+.menu-wrap {
+  position: relative;
+}
+.menu-btn {
+  width: 38px; height: 38px;
+  background: rgba(255,255,255,0.1);
+  border: 1.5px solid rgba(255,255,255,0.2);
+  border-radius: 9px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4.5px;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.menu-btn:hover { background: rgba(255,255,255,0.18); }
+.menu-btn.abierto { background: rgba(255,255,255,0.2); }
+.hamburger-line {
+  width: 16px; height: 2px;
+  background: white;
+  border-radius: 2px;
+  transition: all 0.25s;
+  transform-origin: center;
+}
+.menu-btn.abierto .hamburger-line:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.menu-btn.abierto .hamburger-line:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.menu-btn.abierto .hamburger-line:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+.menu-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: white;
+  border: 1.5px solid var(--gris-borde);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(26,74,46,0.18);
+  min-width: 240px;
+  padding: 6px;
+  z-index: 2000;
+  animation: menuDown 0.2s ease;
+}
+.menu-dropdown.visible { display: block; }
+@keyframes menuDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  text-decoration: none;
+  color: var(--gris-texto);
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: background 0.15s;
+  cursor: pointer;
+}
+.menu-item:hover { background: var(--verde-palido); color: var(--verde-oscuro); }
+.menu-item svg { width: 16px; height: 16px; stroke: var(--verde-medio); flex-shrink: 0; }
+.menu-separador {
+  height: 1px;
+  background: var(--gris-borde);
+  margin: 4px 6px;
+}
+.menu-info {
+  padding: 8px 12px;
+  font-size: 0.76rem;
+  color: var(--gris-suave);
+}
+.menu-info span { font-weight: 600; color: var(--verde-medio); }
+
+/* overlay-agregar reutiliza estilos de .overlay */
+.overlay-agregar {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(26,74,46,0.45);
+  z-index: 3000;
+  backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+  padding: 1rem;
+}
+.overlay-agregar.visible { display: flex; }
+@media (max-width: 600px) {
+  .overlay-agregar { padding: 0; align-items: flex-end; }
+  .overlay-agregar .modal { border-radius: 16px 16px 0 0; }
+}
 </style>
 </head>
 <body>
@@ -731,18 +831,74 @@ footer a { color: var(--verde-menta); text-decoration: none; }
         <span class="logo-subtitulo">Cooperativas de Trabajo</span>
       </div>
     </a>
-    <div class="header-stats">
-      <div class="stat-pill">
-        <span class="num" id="stat-total">12</span>
-        <span class="lbl">Cooperativas</span>
+    <div class="header-derecha">
+      <div class="header-stats">
+        <div class="stat-pill">
+          <span class="num" id="stat-total">0</span>
+          <span class="lbl">Cooperativas</span>
+        </div>
+        <div class="stat-pill">
+          <span class="num" id="stat-localidades">0</span>
+          <span class="lbl">Localidades</span>
+        </div>
       </div>
-      <div class="stat-pill">
-        <span class="num" id="stat-localidades">8</span>
-        <span class="lbl">Localidades</span>
+      <div class="menu-wrap">
+        <button class="menu-btn" id="menu-btn" onclick="toggleMenu()" aria-label="Menú">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+        <div class="menu-dropdown" id="menu-dropdown">
+          <a class="menu-item" href="mailto:coopmapasantafe@gmail.com">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Contacto
+          </a>
+          <a class="menu-item" href="#" onclick="abrirModalAgregar();cerrarMenu();return false;">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            ¿Cómo agrego mi cooperativa?
+          </a>
+          <div class="menu-separador"></div>
+          <div class="menu-info">
+            <span id="menu-stat-total">0</span> cooperativas en
+            <span id="menu-stat-loc">0</span> localidades
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </header>
+
+<!-- MODAL AGREGAR COOPERATIVA -->
+<div class="overlay-agregar" id="overlay-agregar" onclick="cerrarModalAgregar(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <button class="modal-cerrar" onclick="cerrarModalAgregar()" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <div class="modal-rubro-tag">Guía</div>
+      <div class="modal-nombre" style="font-size:1.2rem">¿Cómo agrego mi cooperativa?</div>
+      <div class="modal-localidad">Es simple y gratuito</div>
+    </div>
+    <div class="modal-body">
+      <div>
+        <div class="modal-seccion-titulo">Paso 1 — Escribinos</div>
+        <p class="modal-desc">Mandanos un mail a <a href="mailto:coopmapasantafe@gmail.com" style="color:var(--verde-medio)">coopmapasantafe@gmail.com</a> con los datos de tu cooperativa: nombre, rubro, localidad, descripción, año de fundación, cantidad de socios/as, matrícula INAES y datos de contacto.</p>
+      </div>
+      <div>
+        <div class="modal-seccion-titulo">Paso 2 — Las coordenadas</div>
+        <p class="modal-desc">Buscá tu localidad en <a href="https://www.google.com/maps" target="_blank" style="color:var(--verde-medio)">Google Maps</a>, hacé clic derecho sobre el punto exacto y copiá las coordenadas (dos números separados por coma). Incluílas en el mail.</p>
+      </div>
+      <div>
+        <div class="modal-seccion-titulo">Paso 3 — La agregamos</div>
+        <p class="modal-desc">En menos de 48 horas tu cooperativa aparece en el mapa. El servicio es completamente gratuito y colaborativo.</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="mailto:coopmapasantafe@gmail.com" class="btn-primario" style="display:flex;align-items:center;justify-content:center;text-decoration:none;">Enviar mail</a>
+      <button class="btn-secundario" onclick="cerrarModalAgregar()">Cerrar</button>
+    </div>
+  </div>
+</div>
 
 <div class="hero">
   <h1>Cooperativas de Trabajo de<br><em>Santa Fe</em></h1>
@@ -876,7 +1032,7 @@ footer a { color: var(--verde-menta); text-decoration: none; }
 </div>
 
 <footer>
-  <p>CoopMapa Santa Fe · Datos desde Google Sheets · <a href="#">¿Cómo agregar tu cooperativa?</a></p>
+  <p>CoopMapa Santa Fe · Datos desde Google Sheets · <a href="#" onclick="abrirModalAgregar();return false;">¿Cómo agregar tu cooperativa?</a></p>
   <p style="margin-top:5px;font-size:0.73rem">Datos de carácter informativo · Última actualización: 2024</p>
 </footer>
 
@@ -1213,9 +1369,44 @@ cargarDesdeSheets().then(() => {
   const localidadesSet = new Set(COOPERATIVAS.map(c => c.localidad));
   document.getElementById('stat-total').textContent = COOPERATIVAS.length;
   document.getElementById('stat-localidades').textContent = localidadesSet.size;
+  document.getElementById('menu-stat-total').textContent = COOPERATIVAS.length;
+  document.getElementById('menu-stat-loc').textContent = localidadesSet.size;
   agregarMarcadores();
   renderLista();
 });
+
+/* ── MENÚ HAMBURGUESA ── */
+function toggleMenu() {
+  const btn = document.getElementById('menu-btn');
+  const dd  = document.getElementById('menu-dropdown');
+  const abierto = dd.classList.toggle('visible');
+  btn.classList.toggle('abierto', abierto);
+  if (abierto) {
+    setTimeout(() => document.addEventListener('click', cerrarMenuExterno), 10);
+  }
+}
+function cerrarMenu() {
+  document.getElementById('menu-dropdown').classList.remove('visible');
+  document.getElementById('menu-btn').classList.remove('abierto');
+  document.removeEventListener('click', cerrarMenuExterno);
+}
+function cerrarMenuExterno(e) {
+  if (!document.getElementById('menu-wrap') && !e.target.closest('.menu-wrap')) {
+    cerrarMenu();
+  }
+}
+
+/* ── MODAL AGREGAR ── */
+function abrirModalAgregar() {
+  document.getElementById('overlay-agregar').classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+function cerrarModalAgregar(e) {
+  if (e && e.target !== document.getElementById('overlay-agregar')) return;
+  document.getElementById('overlay-agregar').classList.remove('visible');
+  document.body.style.overflow = '';
+}
+
 </script>
 </body>
 </html>
