@@ -1055,7 +1055,7 @@ async function cargarDesdeSheets() {
       return {
         id:          i + 1,
         nombre:      obj.nombre      || '',
-        rubro:       obj.rubro       || 'otro',
+        rubro:       (obj.rubro || 'otro').toLowerCase().trim().replace(/ /g, '_'),
         rubroLabel:  obj.rubroLabel  || 'Otro',
         localidad:   obj.localidad   || '',
         descripcion: obj.descripcion || '',
@@ -1082,7 +1082,7 @@ async function cargarDesdeSheets() {
 const RUBRO_COLORES = {
   industrial:   { bg:'#e0e8f0', txt:'#1a3a5c', marker:'#3a6ea8' },
   alimentos:    { bg:'#fdf0d8', txt:'#8a5a10', marker:'#d4a030' },
-  lavado:       { bg:'#dbeeff', txt:'#1a5a9e', marker:'#3a82d4' },
+  lavado_de_ropa: { bg:'#dbeeff', txt:'#1a5a9e', marker:'#3a82d4' },
   reciclado:    { bg:'#e3f0d8', txt:'#2d6e47', marker:'#4a9e6b' },
   mantenimiento:{ bg:'#f5ebe0', txt:'#7a4a20', marker:'#b07040' },
   audiovisual:  { bg:'#ede8fc', txt:'#5b3ea8', marker:'#7c5cbf' },
