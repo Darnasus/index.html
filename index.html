@@ -1273,7 +1273,7 @@ function abrirModal(id) {
   document.getElementById('m-localidad').textContent = '📍 ' + c.localidad;
   document.getElementById('m-descripcion').textContent = c.descripcion;
   document.getElementById('m-anio').textContent = c.anio || '—';
-  document.getElementById('m-provincia').textContent = c.provincia ? c.provincia + ' personas' : '—';
+  document.getElementById('m-provincia').textContent = c.provincia ? c.provincia;
   document.getElementById('m-matricula').textContent = c.matricula || '—';
   document.getElementById('m-loc2').textContent = c.localidad;
 
