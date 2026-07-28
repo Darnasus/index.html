@@ -882,7 +882,7 @@ footer a { color: var(--verde-menta); text-decoration: none; }
     <div class="modal-body">
       <div>
         <div class="modal-seccion-titulo">Paso 1 — Escribinos</div>
-        <p class="modal-desc">Mandanos un mail a <a href="mailto:coopmapasantafe@gmail.com" style="color:var(--verde-medio)">coopmapasantafe@gmail.com</a> con los datos de tu cooperativa: nombre, rubro, localidad, descripción, año de fundación, cantidad de socios/as, matrícula INAES y datos de contacto.</p>
+        <p class="modal-desc">Mandanos un mail a <a href="mailto:coopmapasantafe@gmail.com" style="color:var(--verde-medio)">coopmapasantafe@gmail.com</a> con los datos de tu cooperativa: nombre, rubro, provincia, localidad, descripción, año de fundación, matrícula INAES y datos de contacto.</p>
       </div>
       <div>
         <div class="modal-seccion-titulo">Paso 2 — Las coordenadas</div>
@@ -1014,7 +1014,7 @@ footer a { color: var(--verde-menta); text-decoration: none; }
         <div class="modal-seccion-titulo">Datos</div>
         <div class="modal-datos-grid">
           <div class="dato-item"><div class="dato-label">Año de fundación</div><div class="dato-valor" id="m-anio">—</div></div>
-          <div class="dato-item"><div class="dato-label">Socios/as</div><div class="dato-valor" id="m-socios">—</div></div>
+          <div class="dato-item"><div class="dato-label">Provincia</div><div class="dato-valor" id="m-provincia">—</div></div>
           <div class="dato-item"><div class="dato-label">Matrícula INAES</div><div class="dato-valor" id="m-matricula">—</div></div>
           <div class="dato-item"><div class="dato-label">Localidad</div><div class="dato-valor" id="m-loc2">—</div></div>
         </div>
@@ -1076,7 +1076,7 @@ async function cargarDesdeSheets() {
         localidad:   obj.localidad   || '',
         descripcion: obj.descripcion || '',
         anio:        obj.anio        || '',
-        socios:      obj.socios      || '',
+        provincia:      obj.provincia      || '',
         matricula:   obj.matricula   || '',
         lat:         parseFloat(obj.lat)  || null,
         lng:         parseFloat(obj.lng)  || null,
@@ -1273,7 +1273,7 @@ function abrirModal(id) {
   document.getElementById('m-localidad').textContent = '📍 ' + c.localidad;
   document.getElementById('m-descripcion').textContent = c.descripcion;
   document.getElementById('m-anio').textContent = c.anio || '—';
-  document.getElementById('m-socios').textContent = c.socios ? c.socios + ' personas' : '—';
+  document.getElementById('m-provincia').textContent = c.provincia ? c.provincia : '—';
   document.getElementById('m-matricula').textContent = c.matricula || '—';
   document.getElementById('m-loc2').textContent = c.localidad;
 
