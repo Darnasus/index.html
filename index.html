@@ -233,7 +233,7 @@ header {
   border: 1.5px solid var(--gris-borde);
   border-radius: var(--radio);
   padding: 1rem 1.2rem 1rem 1.5rem;
-  min-height: 120px;
+  min-height: 100px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -915,17 +915,8 @@ footer a { color: var(--verde-menta); text-decoration: none; }
       <input type="text" id="buscar" placeholder="Buscar por nombre o localidad…" autocomplete="off">
     </div>
     <select class="select-rubro" id="filtro-rubro">
-      <option value="">Todos los rubros</option>
-      <option value="produccion">Producción</option>
-      <option value="servicios">Servicios</option>
-      <option value="agro">Agro / Alimentos</option>
-      <option value="tecnologia">Tecnología</option>
-      <option value="salud">Salud</option>
-      <option value="educacion">Educación</option>
-      <option value="transporte">Transporte</option>
-      <option value="construccion">Construcción</option>
-      <option value="otro">Otro</option>
-    </select>
+  <option value="">Todos los rubros</option>
+</select>
     <div class="btn-vista">
       <button class="activo" id="btn-lista" onclick="setVista('lista')" title="Lista con mapa">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1.5" fill="currentColor"/><circle cx="3" cy="12" r="1.5" fill="currentColor"/><circle cx="3" cy="18" r="1.5" fill="currentColor"/></svg>
@@ -979,17 +970,8 @@ footer a { color: var(--verde-menta); text-decoration: none; }
     </div>
     <div class="drawer-rubro-fila">
       <select class="drawer-select" id="filtro-rubro-drawer">
-        <option value="">Todos los rubros</option>
-        <option value="produccion">Producción</option>
-        <option value="servicios">Servicios</option>
-        <option value="agro">Agro / Alimentos</option>
-        <option value="tecnologia">Tecnología</option>
-        <option value="salud">Salud</option>
-        <option value="educacion">Educación</option>
-        <option value="transporte">Transporte</option>
-        <option value="construccion">Construcción</option>
-        <option value="otro">Otro</option>
-      </select>
+  <option value="">Todos los rubros</option>
+</select>
       <span class="drawer-contador"><strong id="num-visible-drawer">12</strong> resultados</span>
     </div>
   </div>
@@ -1098,14 +1080,18 @@ async function cargarDesdeSheets() {
 
 
 const RUBRO_COLORES = {
-  produccion:   { bg:'#e3f0d8', txt:'#2d6e47', marker:'#4a9e6b' },
-  servicios:    { bg:'#dbeeff', txt:'#1a5a9e', marker:'#3a82d4' },
-  agro:         { bg:'#fdf0d8', txt:'#8a5a10', marker:'#d4a030' },
-  tecnologia:   { bg:'#ede8fc', txt:'#5b3ea8', marker:'#7c5cbf' },
-  salud:        { bg:'#fde8e8', txt:'#9e2020', marker:'#d44a4a' },
-  educacion:    { bg:'#e8f5fe', txt:'#1a6e8a', marker:'#3a9ec4' },
-  transporte:   { bg:'#fff0db', txt:'#8a6010', marker:'#c48a30' },
-  construccion: { bg:'#f5ebe0', txt:'#7a4a20', marker:'#b07040' },
+  industrial:   { bg:'#e0e8f0', txt:'#1a3a5c', marker:'#3a6ea8' },
+  alimentos:    { bg:'#fdf0d8', txt:'#8a5a10', marker:'#d4a030' },
+  lavado:       { bg:'#dbeeff', txt:'#1a5a9e', marker:'#3a82d4' },
+  reciclado:    { bg:'#e3f0d8', txt:'#2d6e47', marker:'#4a9e6b' },
+  mantenimiento:{ bg:'#f5ebe0', txt:'#7a4a20', marker:'#b07040' },
+  audiovisual:  { bg:'#ede8fc', txt:'#5b3ea8', marker:'#7c5cbf' },
+  cannabis:     { bg:'#d8f0e0', txt:'#1a6e35', marker:'#2ea84a' },
+  artesanal:    { bg:'#fde8d8', txt:'#8a3a10', marker:'#d46030' },
+  bar_cultural: { bg:'#fde8f5', txt:'#8a1a5a', marker:'#c43a8a' },
+  contadores:   { bg:'#e8f5fe', txt:'#1a6e8a', marker:'#3a9ec4' },
+  construccion: { bg:'#f0eeea', txt:'#555',    marker:'#888' },
+  cosmetica:    { bg:'#fce8f0', txt:'#9e1a60', marker:'#d44a90' },
   otro:         { bg:'#f0eeea', txt:'#555',    marker:'#888' }
 };
 
@@ -1377,6 +1363,17 @@ cargarDesdeSheets().then(() => {
   document.getElementById('menu-stat-total').textContent = COOPERATIVAS.length;
   document.getElementById('menu-stat-loc').textContent = localidadesSet.size;
   agregarMarcadores();
+  const rubrosVistos = new Set();
+const opcionesHTML = ['<option value="">Todos los rubros</option>'];
+COOPERATIVAS.forEach(c => {
+  if (c.rubro && !rubrosVistos.has(c.rubro)) {
+    rubrosVistos.add(c.rubro);
+    opcionesHTML.push(`<option value="${c.rubro}">${c.rubroLabel}</option>`);
+  }
+});
+const opcionesStr = opcionesHTML.join('');
+document.getElementById('filtro-rubro').innerHTML = opcionesStr;
+document.getElementById('filtro-rubro-drawer').innerHTML = opcionesStr;
   renderLista();
 });
 
