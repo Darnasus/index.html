@@ -197,7 +197,7 @@ header {
   margin: 0 auto;
   padding: 1.25rem 1.25rem;
   display: grid;
-  grid-template-columns: 340px 1fr;
+  grid-template-columns: 420px 1fr;
   gap: 1.25rem;
   min-height: calc(100vh - 200px);
 }
@@ -208,7 +208,7 @@ header {
   flex-direction: column;
   gap: 0.625rem;
   overflow-y: auto;
-  max-height: calc(100vh - 230px);
+  max-height: calc(100vh - 210px);
   padding-right: 4px;
 }
 .panel-lista::-webkit-scrollbar { width: 4px; }
@@ -231,7 +231,7 @@ header {
   background: white;
   border: 1.5px solid var(--gris-borde);
   border-radius: var(--radio);
-  padding: 0.875rem 1rem;
+  padding: 1.1rem 1.2rem;
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
@@ -257,11 +257,10 @@ header {
 /* nombre en una línea propia, sin competir con el tag */
 .card-coop-nombre {
   font-weight: 600;
-  font-size: 0.88rem;
+  font-size: 1rem;
   color: var(--verde-oscuro);
-  line-height: 1.35;
-  margin-bottom: 5px;
-  /* permite wrapping pero no trunca de forma abrupta */
+  line-height: 1.4;
+  margin-bottom: 7px;
   word-break: break-word;
 }
 .card-coop-meta {
@@ -272,27 +271,28 @@ header {
   margin-bottom: 5px;
 }
 .tag-rubro {
-  font-size: 0.66rem;
-  font-weight: 500;
-  padding: 2px 7px;
+  font-size: 0.73rem;
+  font-weight: 600;
+  padding: 3px 9px;
   border-radius: 20px;
   white-space: nowrap;
   flex-shrink: 0;
 }
 .card-coop-loc {
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   color: var(--gris-suave);
-  display: flex; align-items: center; gap: 3px;
+  display: flex; align-items: center; gap: 4px;
 }
-.card-coop-loc svg { width: 11px; height: 11px; stroke: var(--verde-claro); flex-shrink: 0; }
+.card-coop-loc svg { width: 12px; height: 12px; stroke: var(--verde-claro); flex-shrink: 0; }
 .card-coop-desc {
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   color: var(--gris-suave);
-  line-height: 1.5;
+  line-height: 1.6;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  margin-top: 4px;
 }
 
 .sin-resultados {
@@ -882,7 +882,7 @@ footer a { color: var(--verde-menta); text-decoration: none; }
     <div class="modal-body">
       <div>
         <div class="modal-seccion-titulo">Paso 1 — Escribinos</div>
-        <p class="modal-desc">Mandanos un mail a <a href="mailto:coopmapasantafe@gmail.com" style="color:var(--verde-medio)">coopmapasantafe@gmail.com</a> con los datos de tu cooperativa: nombre, rubro, provincia, localidad, descripción, año de fundación, matrícula INAES y datos de contacto.</p>
+        <p class="modal-desc">Mandanos un mail a <a href="mailto:coopmapasantafe@gmail.com" style="color:var(--verde-medio)">coopmapasantafe@gmail.com</a> con los datos de tu cooperativa: nombre, rubro, localidad, descripción, año de fundación, cantidad de socios/as, matrícula INAES y datos de contacto.</p>
       </div>
       <div>
         <div class="modal-seccion-titulo">Paso 2 — Las coordenadas</div>
@@ -1014,7 +1014,7 @@ footer a { color: var(--verde-menta); text-decoration: none; }
         <div class="modal-seccion-titulo">Datos</div>
         <div class="modal-datos-grid">
           <div class="dato-item"><div class="dato-label">Año de fundación</div><div class="dato-valor" id="m-anio">—</div></div>
-          <div class="dato-item"><div class="dato-label">Provincia</div><div class="dato-valor" id="m-provincia">—</div></div>
+          <div class="dato-item"><div class="dato-label">Socios/as</div><div class="dato-valor" id="m-socios">—</div></div>
           <div class="dato-item"><div class="dato-label">Matrícula INAES</div><div class="dato-valor" id="m-matricula">—</div></div>
           <div class="dato-item"><div class="dato-label">Localidad</div><div class="dato-valor" id="m-loc2">—</div></div>
         </div>
@@ -1076,7 +1076,7 @@ async function cargarDesdeSheets() {
         localidad:   obj.localidad   || '',
         descripcion: obj.descripcion || '',
         anio:        obj.anio        || '',
-        provincia:      obj.provincia      || '',
+        socios:      obj.socios      || '',
         matricula:   obj.matricula   || '',
         lat:         parseFloat(obj.lat)  || null,
         lng:         parseFloat(obj.lng)  || null,
@@ -1273,14 +1273,17 @@ function abrirModal(id) {
   document.getElementById('m-localidad').textContent = '📍 ' + c.localidad;
   document.getElementById('m-descripcion').textContent = c.descripcion;
   document.getElementById('m-anio').textContent = c.anio || '—';
-  document.getElementById('m-provincia').textContent = c.provincia ? c.provincia;
+  document.getElementById('m-socios').textContent = c.socios ? c.socios + ' personas' : '—';
   document.getElementById('m-matricula').textContent = c.matricula || '—';
   document.getElementById('m-loc2').textContent = c.localidad;
 
   let ch = '';
   if (c.telefono) ch += `<div class="contacto-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.09 6.09l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>${c.telefono}</div>`;
   if (c.email)   ch += `<div class="contacto-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><a href="mailto:${c.email}">${c.email}</a></div>`;
-  if (c.web)     ch += `<div class="contacto-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><a href="https://${c.web}" target="_blank">${c.web}</a></div>`;
+  if (c.web) {
+    const webUrl = c.web.match(/^https?:\/\//) ? c.web : 'https://' + c.web;
+    ch += `<div class="contacto-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><a href="${webUrl}" target="_blank" rel="noopener">${c.web}</a></div>`;
+  }
   document.getElementById('m-contacto').innerHTML = ch || '<p style="font-size:0.83rem;color:var(--gris-suave)">Sin datos de contacto.</p>';
 
   document.getElementById('overlay').classList.add('visible');
