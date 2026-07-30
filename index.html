@@ -818,6 +818,94 @@ footer a { color: var(--verde-menta); text-decoration: none; }
   .overlay-agregar { padding: 0; align-items: flex-end; }
   .overlay-agregar .modal { border-radius: 16px 16px 0 0; }
 }
+/* ─── ESTADÍSTICAS ─── */
+.stats-wrap {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.25rem 1.25rem 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+}
+.stat-card {
+  background: white;
+  border: 1.5px solid var(--gris-borde);
+  border-radius: var(--radio);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stat-card-num {
+  font-family: 'Fraunces', serif;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--verde-oscuro);
+  line-height: 1;
+}
+.stat-card-label {
+  font-size: 0.78rem;
+  color: var(--gris-suave);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.stat-card-bar {
+  height: 3px;
+  background: var(--gris-borde);
+  border-radius: 2px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.stat-card-bar-fill {
+  height: 100%;
+  background: var(--verde-claro);
+  border-radius: 2px;
+  transition: width 0.8s ease;
+}
+.stats-seccion-titulo {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--verde-medio);
+  margin: 1.25rem 0 0.5rem;
+}
+.rubros-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.5rem;
+}
+.rubro-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1.5px solid var(--gris-borde);
+  border-radius: 10px;
+  padding: 0.6rem 0.875rem;
+}
+.rubro-stat-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.rubro-stat-info { flex: 1; min-width: 0; }
+.rubro-stat-nombre {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--gris-texto);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rubro-stat-count {
+  font-size: 0.7rem;
+  color: var(--gris-suave);
+}
+@media (max-width: 768px) {
+  .stats-wrap { padding: 0.75rem 1rem 0; }
+  .stat-card-num { font-size: 1.4rem; }
+}
 </style>
 </head>
 <body>
@@ -926,11 +1014,38 @@ footer a { color: var(--verde-menta); text-decoration: none; }
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         Grilla
       </button>
+      <button id="btn-estadisticas" onclick="setVista('estadisticas')" title="Estadísticas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Estadísticas
+      </button>
     </div>
     <span class="contador-resultados">Mostrando <strong id="num-visible">12</strong> cooperativas</span>
   </div>
 </div>
-
+<!-- ESTADÍSTICAS -->
+<div class="stats-wrap" id="stats-numeros" style="display:none">
+  <div class="stat-card">
+    <div class="stat-card-num" id="snum-total">0</div>
+    <div class="stat-card-label">Cooperativas</div>
+    <div class="stat-card-bar"><div class="stat-card-bar-fill" style="width:100%"></div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-num" id="snum-localidades">0</div>
+    <div class="stat-card-label">Localidades</div>
+    <div class="stat-card-bar"><div class="stat-card-bar-fill" id="sbar-loc" style="width:0%"></div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-num" id="snum-rubros">0</div>
+    <div class="stat-card-label">Rubros</div>
+    <div class="stat-card-bar"><div class="stat-card-bar-fill" id="sbar-rub" style="width:0%"></div></div>
+  </div>
+</div>
+<div class="stats-wrap" id="stats-rubros" style="display:none">
+  <div style="grid-column:1/-1">
+    <div class="stats-seccion-titulo">Cooperativas por rubro</div>
+    <div class="rubros-grid" id="rubros-grid"></div>
+  </div>
+</div>
 <!-- MENSAJE CARGANDO -->
 <div id="cargando-msg" style="display:none;position:fixed;inset:0;z-index:5000;background:rgba(26,74,46,0.55);backdrop-filter:blur(3px);align-items:center;justify-content:center;flex-direction:column;gap:12px;">
   <div style="width:40px;height:40px;border:3px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
@@ -1306,18 +1421,31 @@ function setVista(v) {
   vistaActual = v;
   const panel = document.getElementById('panel-lista');
   const wrap  = document.getElementById('main-wrap');
+  const sn    = document.getElementById('stats-numeros');
+  const sr    = document.getElementById('stats-rubros');
   document.getElementById('btn-lista').classList.toggle('activo', v === 'lista');
-  document.getElementById('btn-grid').classList.toggle('activo',  v === 'grid');
-  if (v === 'grid') {
-    panel.classList.add('grid-view');
-    wrap.style.gridTemplateColumns = '1fr';
-    document.getElementById('panel-mapa').style.display = 'none';
+  document.getElementById('btn-grid').classList.toggle('activo', v === 'grid');
+  document.getElementById('btn-estadisticas').classList.toggle('activo', v === 'estadisticas');
+  if (v === 'estadisticas') {
+    wrap.style.display = 'none';
+    sn.style.display = 'grid';
+    sr.style.display = 'grid';
+    renderEstadisticas();
   } else {
-    panel.classList.remove('grid-view');
-    wrap.style.gridTemplateColumns = '';
-    document.getElementById('panel-mapa').style.display = '';
+    wrap.style.display = 'grid';
+    sn.style.display = 'none';
+    sr.style.display = 'none';
+    if (v === 'grid') {
+      panel.classList.add('grid-view');
+      wrap.style.gridTemplateColumns = '1fr';
+      document.getElementById('panel-mapa').style.display = 'none';
+    } else {
+      panel.classList.remove('grid-view');
+      wrap.style.gridTemplateColumns = '';
+      document.getElementById('panel-mapa').style.display = '';
+    }
+    renderLista();
   }
-  renderLista();
 }
 
 /* ── DRAWER MÓVIL ── */
@@ -1407,6 +1535,33 @@ function cerrarModalAgregar(e) {
   if (e && e.target !== document.getElementById('overlay-agregar')) return;
   document.getElementById('overlay-agregar').classList.remove('visible');
   document.body.style.overflow = '';
+}
+function renderEstadisticas() {
+  const total = COOPERATIVAS.length;
+  const locs  = new Set(COOPERATIVAS.map(c => c.localidad));
+  const rubs  = new Set(COOPERATIVAS.map(c => c.rubro));
+  document.getElementById('snum-total').textContent = total;
+  document.getElementById('snum-localidades').textContent = locs.size;
+  document.getElementById('snum-rubros').textContent = rubs.size;
+  document.getElementById('sbar-loc').style.width = Math.min(100, (locs.size / total) * 300) + '%';
+  document.getElementById('sbar-rub').style.width = Math.min(100, (rubs.size / total) * 400) + '%';
+  const conteo = {};
+  COOPERATIVAS.forEach(c => {
+    if (!conteo[c.rubro]) conteo[c.rubro] = { count: 0, label: c.rubroLabel };
+    conteo[c.rubro].count++;
+  });
+  document.getElementById('rubros-grid').innerHTML = Object.entries(conteo)
+    .sort((a,b) => b[1].count - a[1].count)
+    .map(([rubro, data]) => {
+      const col = RUBRO_COLORES[rubro] || RUBRO_COLORES.otro;
+      return `<div class="rubro-stat-item">
+        <div class="rubro-stat-dot" style="background:${col.marker}"></div>
+        <div class="rubro-stat-info">
+          <div class="rubro-stat-nombre">${data.label}</div>
+          <div class="rubro-stat-count">${data.count} cooperativa${data.count !== 1 ? 's' : ''}</div>
+        </div>
+      </div>`;
+    }).join('');
 }
 
 </script>
