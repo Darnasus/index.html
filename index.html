@@ -715,9 +715,6 @@ footer a { color: var(--verde-menta); text-decoration: none; }
 }
 
 @media (min-width: 769px) {
-  .fab-lista { display: none !important; }
-  .drawer-overlay { display: none !important; }
-  .drawer { display: none !important; }
 }
 
 /* ─── HEADER DERECHA ─── */
@@ -1424,9 +1421,17 @@ function setVista(v) {
   const wrap  = document.getElementById('main-wrap');
   const sn    = document.getElementById('stats-numeros');
   const sr    = document.getElementById('stats-rubros');
+  const esMovil = window.innerWidth <= 768;
+
   document.getElementById('btn-lista').classList.toggle('activo', v === 'lista');
   document.getElementById('btn-grid').classList.toggle('activo', v === 'grid');
   document.getElementById('btn-estadisticas').classList.toggle('activo', v === 'estadisticas');
+
+  if (v === 'lista' && esMovil) {
+    abrirDrawer();
+    return;
+  }
+
   if (v === 'estadisticas') {
     wrap.style.display = 'none';
     sn.style.display = 'grid';
