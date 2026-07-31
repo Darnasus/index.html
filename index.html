@@ -679,9 +679,10 @@ footer a { color: var(--verde-menta); text-decoration: none; }
   /* filtros solo buscador + rubro en una fila */
   .filtros-inner {
     padding: 0.625rem 1rem;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
   }
-  .btn-vista { display: none; }
+  .btn-vista { display: flex; flex-wrap: wrap; }
+  .btn-vista button { font-size: 0.72rem; padding: 0 8px; }
   .contador-resultados { display: none; }
 
   /* layout: solo mapa en pantalla completa */
