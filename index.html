@@ -1004,6 +1004,10 @@ footer a { color: var(--verde-menta); text-decoration: none; }
   <option value="">Todos los rubros</option>
 </select>
     <div class="btn-vista">
+      <button id="btn-mapa" onclick="setVista('mapa')" title="Ver mapa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 20l-5.5-2V4l5.5 2m0 14l6-2m-6 2V6m6 12l5.5 2V6L15 4m0 14V4m0 0L9 6"/></svg>
+        Mapa
+      </button>
       <button class="activo" id="btn-lista" onclick="setVista('lista')" title="Lista con mapa">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1.5" fill="currentColor"/><circle cx="3" cy="12" r="1.5" fill="currentColor"/><circle cx="3" cy="18" r="1.5" fill="currentColor"/></svg>
         Lista
@@ -1418,6 +1422,7 @@ function setVista(v) {
   const sr    = document.getElementById('stats-rubros');
   const esMovil = window.innerWidth <= 768;
 
+  document.getElementById('btn-mapa').classList.toggle('activo', v === 'mapa');
   document.getElementById('btn-lista').classList.toggle('activo', v === 'lista');
   document.getElementById('btn-grid').classList.toggle('activo', v === 'grid');
   document.getElementById('btn-estadisticas').classList.toggle('activo', v === 'estadisticas');
@@ -1444,6 +1449,8 @@ function setVista(v) {
       panel.classList.remove('grid-view');
       wrap.style.gridTemplateColumns = '';
       document.getElementById('panel-mapa').style.display = '';
+      if (v === 'mapa') panel.style.display = 'none';
+      else panel.style.display = '';
     }
     renderLista();
   }
@@ -1503,6 +1510,7 @@ COOPERATIVAS.forEach(c => {
 const opcionesStr = opcionesHTML.join('');
 document.getElementById('filtro-rubro').innerHTML = opcionesStr;
 document.getElementById('filtro-rubro-drawer').innerHTML = opcionesStr;
+document.getElementById('btn-lista').classList.add('activo');
   renderLista();
 });
 
